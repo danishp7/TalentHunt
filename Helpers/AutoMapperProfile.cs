@@ -14,6 +14,20 @@ namespace TalentHunt.Helpers
         {
             CreateMap<RegisterUserDto, User>().ReverseMap();
             CreateMap<LogInUserDto, User>().ReverseMap();
+
+            CreateMap<PostVacancyDto, Vacancy>().ReverseMap();
+
+            CreateMap<ExperienceDto, Experience>().ReverseMap();
+
+            CreateMap<JobPostDto, JobPost>().ReverseMap();
+
+            CreateMap<ResponsibilityDto, Responsibility>().ReverseMap();
+
+            CreateMap<KeyResponsibilityDto, KeyResponsibility>().ReverseMap();
+
+            CreateMap<DetailedVacancyDto, Vacancy>().ReverseMap();
+
+            CreateMap<ConciseVacancyDto, Vacancy>().ReverseMap();
         }
     }
 }

@@ -17,6 +17,7 @@ namespace TalentHunt.Data
         public DbSet<JobPost> JobPosts { get; set; }
         public DbSet<Responsibility> Responsibilities { get; set; }
         public DbSet<KeyResponsibility> KeyResponsibilities { get; set; }
+        public DbSet<Experience> Experiences { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -31,7 +32,7 @@ namespace TalentHunt.Data
                 .HasOne(u => u.User)
                 .WithMany(u => u.JobPosts)
                 .HasForeignKey(u => u.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             // 1 vacancy can be add by many users
             modelBuilder.Entity<JobPost>()
@@ -53,14 +54,14 @@ namespace TalentHunt.Data
                 .HasOne(r => r.Responsibility)
                 .WithMany(r => r.KeyResponsibilities)
                 .HasForeignKey(r => r.ResponsibilityId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             // 1 vacancy can have many responsibilities
             modelBuilder.Entity<KeyResponsibility>()
                 .HasOne(v => v.Vacancy)
                 .WithMany(v => v.KeyResponsibilities)
                 .HasForeignKey(v => v.VacancyId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             //----------------------------------------------
 
@@ -70,7 +71,7 @@ namespace TalentHunt.Data
             modelBuilder.Entity<Experience>()
                 .HasMany(e => e.Vacancies)
                 .WithOne(v => v.Experience)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
