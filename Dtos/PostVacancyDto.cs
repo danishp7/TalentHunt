@@ -18,6 +18,10 @@ namespace TalentHunt.Dtos
         [StringLength(5000, ErrorMessage = "Job description characters limit exceeding.")]
         [Display(Name = "Job Description")]
         public string Description { get; set; }
+        
+        [Required(ErrorMessage = "Job salary field must be provided.")]
+        [Display(Name = "Job Salary")]
+        public int Salary { get; set; }
 
         // [Required(ErrorMessage = "User id must be provided.")]
         public ICollection<JobPostDto> JobPosts { get; set; }
@@ -29,5 +33,9 @@ namespace TalentHunt.Dtos
         [Required(ErrorMessage = "Key Responsibilities must be provided.")]
         [Display(Name = "Job Responsibilities")]
         public ICollection<KeyResponsibilityDto> KeyResponsibilities { get; set; }
+
+        [Required(ErrorMessage = "Experience field must be filled.")]
+        [Display(Name = "Job Experience")]
+        public EducationDto Education { get; set; }
     }
 }

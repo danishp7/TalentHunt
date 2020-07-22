@@ -67,6 +67,10 @@ namespace TalentHunt.Controllers.ApiControllers
             if (!ModelState.IsValid)
                 return BadRequest("Something went wrong...");
 
+            var validateModel = await _repo.ValidateVacancy(vacancyDto);
+            if (validateModel == null)
+                return BadRequest("Something went wrong...");
+
             var vacancy = await _repo.GetVacancy(id);
 
             var updatedVacancy = _mapper.Map<PostVacancyDto, Vacancy>(vacancyDto, vacancy);
@@ -102,8 +106,10 @@ namespace TalentHunt.Controllers.ApiControllers
             {
                 Title = returnVacancy.Title,
                 Description = returnVacancy.Description,
+                Education = returnVacancy.Education,
+                Responsibilities = responsibilitiesDto,
                 Experience = returnVacancy.Experience,
-                Responsibilities = responsibilitiesDto
+                Salary = returnVacancy.Salary,
             };
             return Ok(returnedVacancy);
         }

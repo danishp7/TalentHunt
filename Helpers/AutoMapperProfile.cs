@@ -28,6 +28,8 @@ namespace TalentHunt.Helpers
             CreateMap<DetailedVacancyDto, Vacancy>().ReverseMap();
 
             CreateMap<ConciseVacancyDto, Vacancy>().ReverseMap();
+
+            CreateMap<EducationDto, Education>().ReverseMap();
         }
     }
 }

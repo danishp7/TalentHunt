@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TalentHunt.Data;
 
 namespace TalentHunt.Migrations
 {
     [DbContext(typeof(TalentHuntContext))]
-    partial class TalentHuntContextModelSnapshot : ModelSnapshot
+    [Migration("20200722193425_ApplicationWithRelationsAdded")]
+    partial class ApplicationWithRelationsAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,19 +40,19 @@ namespace TalentHunt.Migrations
                     b.Property<string>("ApplicationAddress")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("DegreeEndDate")
+                    b.Property<DateTime>("DegreeEndDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("DegreeStartDate")
+                    b.Property<DateTime>("DegreeStartDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("EducationLevelId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("EmployerStartDate")
+                    b.Property<DateTime>("EmployerStartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("EmploymentEndDate")
+                    b.Property<DateTime>("EmploymentEndDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("EmploymentId")

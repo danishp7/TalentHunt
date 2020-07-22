@@ -18,6 +18,11 @@ namespace TalentHunt.Data
         public DbSet<Responsibility> Responsibilities { get; set; }
         public DbSet<KeyResponsibility> KeyResponsibilities { get; set; }
         public DbSet<Experience> Experiences { get; set; }
+        public DbSet<Education> Educations { get; set; }
+        public DbSet<Institute> Institutes { get; set; }
+        public DbSet<EducationLevel> EducationLevels { get; set; }
+        public DbSet<Employment> Employments { get; set; }
+        public DbSet<Application> Applications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -72,6 +77,8 @@ namespace TalentHunt.Data
                 .HasMany(e => e.Vacancies)
                 .WithOne(v => v.Experience)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            
         }
     }
 }
