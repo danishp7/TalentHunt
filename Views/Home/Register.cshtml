@@ -48,11 +48,7 @@
             <div class="tab-pane fade" id="register">
                 <form asp-action="Register" method="post">
                     <div asp-validation-summary="None" class="text-danger"></div>
-                    <div class="form-group">
-                        <label asp-for="Item1.UserName" class="control-label"></label>
-                        <input asp-for="Item1.UserName" id="userName" class="form-control" />
-                        <span asp-validation-for="Item1.UserName" class="text-danger"></span>
-                    </div>
+                    
                     <div class="form-group">
                         <label asp-for="Item1.Email" class="control-label"></label>
                         <input asp-for="Item1.Email" id="email" class="form-control" />

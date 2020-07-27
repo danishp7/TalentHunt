@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using TalentHunt.Data;
@@ -14,6 +15,7 @@ using TalentHunt.Models;
 
 namespace TalentHunt.Controllers.ApiControllers
 {
+    [AllowAnonymous]
     [Route("api/vacancies")]
     [ApiController]
     // [Authorize]
@@ -22,30 +24,44 @@ namespace TalentHunt.Controllers.ApiControllers
         private readonly IVacancyRepository _repo;
         private readonly ISharedRepository _sharedRepo;
         private readonly IMapper _mapper;
-        public VacancyController(IVacancyRepository repository, ISharedRepository sharedRepository, IMapper mapper)
+        private readonly UserManager<User> _user;
+        public VacancyController(IVacancyRepository repository, ISharedRepository sharedRepository,
+                                 IMapper mapper, UserManager<User> userManager)
         {
             _repo = repository;
             _sharedRepo = sharedRepository;
             _mapper = mapper;
+            _user = userManager;
         }
 
         // POST: api/vacancies
+        [Authorize]
         [HttpPost("postVacancy")]
         public async Task<IActionResult> PostVacancy([FromBody] PostVacancyDto vacancyDto)
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            if (userId == 0)
+            if (!User.Identity.IsAuthenticated)
+                return BadRequest("Please signed in to your account.");
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
             if (!ModelState.IsValid)
                 return BadRequest("Something went wrong...");
 
-            var validateModel = await _repo.ValidateVacancy(vacancyDto);
+            if (await _repo.IsVacancy(vacancyDto.Title.ToLower()))
+                return BadRequest("Job Post available for similar title.");
+
+            var validateModel = _repo.ValidateVacancy(vacancyDto);
             if (validateModel == null)
                 return BadRequest("Something went wrong...");
 
-            var vacancy = _mapper.Map<Vacancy>(validateModel);
+            var currentlyLoginUserName = User.Identity.Name;
+            var loggedInUser = await _user.FindByEmailAsync(currentlyLoginUserName);
             
+            var vacancy = _mapper.Map<Vacancy>(validateModel);
+            vacancy.AppUser = loggedInUser;
+
             _sharedRepo.Add(vacancy);
             
             if (await _sharedRepo.SaveAll())
@@ -57,21 +73,30 @@ namespace TalentHunt.Controllers.ApiControllers
         }
 
         // PUT: api/vacancies
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateVacancy(int id, [FromBody] PostVacancyDto vacancyDto)
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            if (userId == 0)
+            if (!User.Identity.IsAuthenticated)
+                return BadRequest("Please signed in to your account.");
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
             if (!ModelState.IsValid)
                 return BadRequest("Something went wrong...");
 
-            var validateModel = await _repo.ValidateVacancy(vacancyDto);
+            var validateModel = _repo.ValidateVacancy(vacancyDto);
             if (validateModel == null)
                 return BadRequest("Something went wrong...");
 
-            var vacancy = await _repo.GetVacancy(id);
+            var currentlyLoginUserName = User.Identity.Name;
+            var loggedInUser = await _user.FindByEmailAsync(currentlyLoginUserName);
+
+            var vacancy = await _repo.GetVacancy(id, loggedInUser);
+            if (vacancy == null)
+                return NotFound("No such Job post available.");
 
             var updatedVacancy = _mapper.Map<PostVacancyDto, Vacancy>(vacancyDto, vacancy);
             await _sharedRepo.SaveAll();
@@ -83,17 +108,24 @@ namespace TalentHunt.Controllers.ApiControllers
 
 
         // GET: api/vacancies/{id}
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetVacancy(int id)
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            if (userId == 0)
+            if (!User.Identity.IsAuthenticated)
+                return BadRequest("Please signed in to your account.");
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
             if (!ModelState.IsValid)
                 return BadRequest("Something went wrong...");
 
-            var detailedVacancy = await _repo.GetVacancy(id);
+            var currentlyLoginUserName = User.Identity.Name;
+            var loggedInUser = await _user.FindByEmailAsync(currentlyLoginUserName);
+
+            var detailedVacancy = await _repo.GetVacancy(id, loggedInUser);
             if (detailedVacancy == null)
                 return BadRequest("Something went wrong...");
 
@@ -115,17 +147,24 @@ namespace TalentHunt.Controllers.ApiControllers
         }
 
         // GET: api/vacancies
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetVacancies()
         {
-            //var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            //if (userId == 0)
-            //    return Unauthorized();
+            if (!User.Identity.IsAuthenticated)
+                return BadRequest("Please signed in to your account.");
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
 
             if (!ModelState.IsValid)
                 return BadRequest("Something went wrong...");
 
-            var vacancies = await _repo.GetVacancies();
+            var currentlyLoginUserName = User.Identity.Name;
+            var loggedInUser = await _user.FindByEmailAsync(currentlyLoginUserName);
+
+            var vacancies = await _repo.GetVacancies(loggedInUser);
             if (vacancies == null)
                 return BadRequest("Something went wrong...");
 
@@ -134,20 +173,5 @@ namespace TalentHunt.Controllers.ApiControllers
             return Ok(returnVacancies);
         }
 
-        // DELETE: api/vacancies/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteVacancy(int id)
-        {
-            var vacancy = await _repo.GetVacancy(id);
-            if (vacancy == null)
-                return NotFound("No such vacancy in our system.");
-
-            _sharedRepo.Delete<Vacancy>(vacancy);
-
-            if (await _sharedRepo.SaveAll())
-                return Ok("Vacancy has been deleted successfully!");
-
-            return BadRequest("Something went wrong...");
-        }
     }
 }

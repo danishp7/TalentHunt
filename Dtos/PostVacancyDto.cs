@@ -9,6 +9,7 @@ namespace TalentHunt.Dtos
 {
     public class PostVacancyDto
     {
+
         [Required(ErrorMessage = "Job title field must be filled.")]
         [StringLength(20, ErrorMessage = "Job title must be in between 5 and 20 characters long.", MinimumLength = 5)]
         [Display(Name = "Job Title")]
@@ -23,9 +24,6 @@ namespace TalentHunt.Dtos
         [Display(Name = "Job Salary")]
         public int Salary { get; set; }
 
-        // [Required(ErrorMessage = "User id must be provided.")]
-        public ICollection<JobPostDto> JobPosts { get; set; }
-
         [Required(ErrorMessage = "Experience field must be filled.")]
         [Display(Name = "Job Experience")]
         public ExperienceDto Experience { get; set; }
@@ -37,5 +35,9 @@ namespace TalentHunt.Dtos
         [Required(ErrorMessage = "Experience field must be filled.")]
         [Display(Name = "Job Experience")]
         public EducationDto Education { get; set; }
+    }
+
+    public class PostVacancyUser
+    {
     }
 }

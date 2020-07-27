@@ -8,10 +8,10 @@ namespace TalentHunt.Data
 {
     public interface IVacancyRepository
     {
-        Task<PostVacancyDto> ValidateVacancy(PostVacancyDto postVacancyDto);
-        Task<Vacancy> GetVacancy(int id);
-        Task<IEnumerable<Vacancy>> GetVacancies();
+        PostVacancyDto ValidateVacancy(PostVacancyDto postVacancyDto);
+        Task<Vacancy> GetVacancy(int id, User loggedInUser);
+        Task<IEnumerable<Vacancy>> GetVacancies(User loggedInUser);
         ICollection<Responsibility> GetResponsibilites(int id);
-
+        Task<bool> IsVacancy(string vacancyName);
     }
 }

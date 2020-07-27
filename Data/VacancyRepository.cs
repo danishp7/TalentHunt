@@ -41,21 +41,22 @@ namespace TalentHunt.Data
             return responsibilities;
         }
 
-        public async Task<IEnumerable<Vacancy>> GetVacancies()
+        public async Task<IEnumerable<Vacancy>> GetVacancies(User loggedInUser)
         {
-            var vacancies = await _ctx.Vacancies.ToListAsync();
+            var vacancies = await _ctx.Vacancies.Where(u => u.AppUser.Id == loggedInUser.Id).ToListAsync();
             if (vacancies == null)
                 return null;
 
             return vacancies;
         }
 
-        public async Task<Vacancy> GetVacancy(int id)
+        public async Task<Vacancy> GetVacancy(int id, User loggedInUser)
         {
             var vacancy = await _ctx.Vacancies
                 .Include(r => r.KeyResponsibilities)
                 .Include(e => e.Experience)
                 .Include(ed => ed.Education)
+                .Where(u => u.AppUser.Id == loggedInUser.Id)
                 .SingleOrDefaultAsync(v => v.Id == id);
             if (vacancy == null)
                 return null;
@@ -64,8 +65,10 @@ namespace TalentHunt.Data
 
         }
 
-        public async Task<PostVacancyDto> ValidateVacancy(PostVacancyDto vacancy)
+        public PostVacancyDto ValidateVacancy(PostVacancyDto vacancy)
         {
+            vacancy.Title = vacancy.Title.ToLower();
+
             if (string.IsNullOrWhiteSpace(vacancy.Title) || string.IsNullOrWhiteSpace(vacancy.Description) ||
                 vacancy.Experience.Years < 0 || string.IsNullOrWhiteSpace(vacancy.Experience.Description) || 
                 vacancy.Salary <= 0 || string.IsNullOrWhiteSpace(vacancy.Education.Title) || 
@@ -75,12 +78,6 @@ namespace TalentHunt.Data
             if (vacancy.KeyResponsibilities.Count() == 0)
                 return null;
 
-            var isTitle = await _ctx.Vacancies.FirstOrDefaultAsync(v => v.Title == vacancy.Title);
-            if (isTitle != null)
-                return null;
-            
-            vacancy.Title = vacancy.Title.ToLower();
-
             foreach (var responsibility in vacancy.KeyResponsibilities)
             {
                 if (string.IsNullOrWhiteSpace(responsibility.Responsibility.Title) ||
@@ -89,7 +86,14 @@ namespace TalentHunt.Data
             }
 
             return vacancy;
+        }
 
+        public async Task<bool> IsVacancy(string vacancyName)
+        {
+            var isTitle = await _ctx.Vacancies.FirstOrDefaultAsync(v => v.Title == vacancyName);
+            if (isTitle != null)
+                return true;
+            return false;
         }
     }
 }
