@@ -13,7 +13,10 @@ namespace TalentHunt.Helpers
         public AutoMapperProfile()
         {
             CreateMap<RegisterUserDto, User>().ReverseMap();
+            
             CreateMap<LogInUserDto, User>().ReverseMap();
+
+            CreateMap<LoggingUserDto, User>().ReverseMap();
 
             CreateMap<PostVacancyDto, Vacancy>().ReverseMap();
 

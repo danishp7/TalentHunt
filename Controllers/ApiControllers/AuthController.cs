@@ -5,7 +5,9 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -16,6 +18,7 @@ using TalentHunt.Models;
 
 namespace TalentHunt.Controllers.ApiControllers
 {
+    [AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
@@ -23,63 +26,107 @@ namespace TalentHunt.Controllers.ApiControllers
         private readonly IAuthRepository _repo;
         private readonly IMapper _mapper;
         private readonly IConfiguration _config;
-        public AuthController(IAuthRepository repository, IMapper mapper, IConfiguration configuration)
+        private readonly UserManager<User> _user;
+        private readonly SignInManager<User> _signInUser;
+
+        public AuthController(IAuthRepository repository, IMapper mapper, IConfiguration configuration,
+                              UserManager<User> userManager, SignInManager<User> signInManager)
         {
             _repo = repository;
             _mapper = mapper;
             _config = configuration;
+            _user = userManager;
+            _signInUser = signInManager;
         }
 
         // Post: api/auth/register
         [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterUserDto userDto)
+        public async Task<IActionResult> Register([FromBody] RegisterUserDto userDto)
         {
-            var user = _mapper.Map<User>(userDto);
-            var checkUser = await _repo.Register(user, userDto.Password);
-            if (checkUser == null)
-                return BadRequest("Something went wrong with request...");
+            if (!ModelState.IsValid)
+                return BadRequest("Something went wrong...");
 
-            var newUser = _mapper.Map<LogInUserDto>(checkUser);
+            // set password
+            var password_hash_key = _repo.CreatePasswordWithEncryption(userDto.Password);
+            User user = new User
+            {
+                UserName = userDto.Email,
+                Email = userDto.Email,
+                NormalizedUserName = userDto.Email.ToUpper().Normalize(),
+                NormalizedEmail = userDto.Email.ToUpper().Normalize()
+            };
 
-            return Created("api/auth/" + checkUser.Id, newUser);
+            var isUserEmail = await _user.FindByEmailAsync(user.Email);
+            if (isUserEmail != null)
+                return BadRequest("User exist with this email address. kindly provide different email id.");
+
+            var isUserAdded = await _user.CreateAsync(user, userDto.Password);
+            if (!isUserAdded.Succeeded)
+                return BadRequest("Something went wrong...");
+
+            var newUser = _mapper.Map<LogInUserDto>(user);
+            return Created("api/auth/" + user.Id, newUser);
         }
 
         // Post: api/auth/login
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoggingUserDto user)
+        public async Task<IActionResult> Login([FromBody] LoggingUserDto logInUserDto)
         {
-            var loggingInUser = await _repo.Login(user.UserName, user.Password);
-            if (loggingInUser == null)
-                return BadRequest("User name or password is wrong...");
+            if (!ModelState.IsValid)
+                return BadRequest("Something went wrong...");
 
-            var loggedInUser = _mapper.Map<LogInUserDto>(loggingInUser);
+            var user = await _user.FindByNameAsync(logInUserDto.Email);
+            if (user == null)
+                return BadRequest("No such user exist, please signup!");
 
-            var claims = new[]
+            var isPassword = await _user.CheckPasswordAsync(user, logInUserDto.Password);
+            if (isPassword == false)
+                return BadRequest("Incorrect UserName or Password.");
+
+            var isLogin = await _signInUser.PasswordSignInAsync(logInUserDto.Email, logInUserDto.Password, false, false);
+            if (isLogin.Succeeded)
             {
-                new Claim(ClaimTypes.NameIdentifier, loggingInUser.Id.ToString()),
-                new Claim(ClaimTypes.Name, loggingInUser.UserName)
-            };
+                var claims = new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.Id),
+                    new Claim(ClaimTypes.Name, user.UserName)
+                };
 
-            var key = new SymmetricSecurityKey(
-                System.Text.Encoding.UTF8.GetBytes(_config.GetSection("AppSettings:Token").Value));
+                var key = new SymmetricSecurityKey(
+                    System.Text.Encoding.UTF8.GetBytes(_config.GetSection("AppSettings:Token").Value));
 
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddMinutes(2000),
-                SigningCredentials = creds
-            };
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(claims),
+                    Expires = DateTime.UtcNow.AddMinutes(2000),
+                    SigningCredentials = creds
+                };
 
-            var tokenHandler = new JwtSecurityTokenHandler();
+                var tokenHandler = new JwtSecurityTokenHandler();
 
-            var token = tokenHandler.CreateToken(tokenDescriptor);
+                var token = tokenHandler.CreateToken(tokenDescriptor);
 
-            return Ok(new {
-                token = tokenHandler.WriteToken(token),
-                user = loggedInUser 
-            });
+                var returnUser = _mapper.Map<LogInUserDto>(user);
+                return Ok(new
+                {
+                    token = tokenHandler.WriteToken(token),
+                    user = returnUser,
+                    message = "Login Successfully"
+                });
+            }
+            return BadRequest("Incorrect UserName or Password");
+            
+        }
+
+        // Get: api/auth/logout
+        [HttpGet("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            // it will signout the user.
+            await _signInUser.SignOutAsync();
+            return Ok("Logout Successfully!");
         }
     }
 }

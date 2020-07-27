@@ -11,9 +11,10 @@ namespace TalentHunt.Models
         public string Title { get; set; }
         public string Description { get; set; }
         public int Salary { get; set; }
+        public User AppUser { get; set; }
 
         // relation with user
-        public ICollection<JobPost> JobPosts { get; set; }
+        /// public ICollection<JobPost> JobPosts { get; set; }
 
         // relation with responsibilities
         public ICollection<KeyResponsibility> KeyResponsibilities { get; set; }

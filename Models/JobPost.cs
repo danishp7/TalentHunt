@@ -2,9 +2,9 @@
 {
     public class JobPost
     {
-        public int UserId { get; set; }
-        public User User { get; set; }
-        public int VacancyId { get; set; }
-        public Vacancy Vacancy { get; set; }
+        //public int UserUserId { get; set; }
+        //public User User { get; set; }
+        //public int VacancyId { get; set; }
+        //public Vacancy Vacancy { get; set; }
     }
 }

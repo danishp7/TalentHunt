@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using TalentHunt.Models;
 
@@ -8,6 +10,7 @@ namespace TalentHunt.Data
     {
         private readonly TalentHuntContext _ctx;
         private readonly ISharedRepository _sharedRepo;
+        private readonly Random _random = new Random();
         public AuthRepository(TalentHuntContext context, ISharedRepository sharedRepository)
         {
             _ctx = context;
@@ -21,7 +24,7 @@ namespace TalentHunt.Data
             if (user == null)
                 return null;
 
-            var isPassword = VerifyPassword(password, user.PasswordHash, user.PasswordSalt);
+            var isPassword = VerifyPassword(password, user.HashPassword, user.PasswordSalt);
             if (isPassword == false)
                 return null;
             
@@ -44,17 +47,30 @@ namespace TalentHunt.Data
             return true;
         }
 
+        public bool IsPassword(string password, byte[] passwordHash, byte[] passwordSalt)
+        {
+            using (var hashedPasswordFromDb = new System.Security.Cryptography.HMACSHA512(passwordSalt))
+            {
+                var enteredPasswordHash = hashedPasswordFromDb.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+
+                for (int i = 0; i < enteredPasswordHash.Length; i++)
+                {
+                    if (passwordHash[i] != enteredPasswordHash[i])
+                        return false;
+                }
+            }
+            return true;
+        }
+
         public async Task<User> Register(User user, string password)
         {
             user.UserName = user.UserName.ToLower();
-            var matchUser = await UserExist(user.UserName);
-            if (matchUser == true)
-                return null;
-
             CreatePasswordWithEncryption(password, out byte[] passwordHash, out byte[] key);
-            user.PasswordHash = passwordHash;
+            user.HashPassword = passwordHash;
             user.PasswordSalt = key;
-
+            user.NormalizedUserName = user.UserName.ToUpper().Normalize();
+            user.NormalizedEmail = user.Email.ToUpper().Normalize();
+            user.PasswordHash = password;
             _sharedRepo.Add<User>(user);
             
             if (await _sharedRepo.SaveAll())
@@ -70,6 +86,20 @@ namespace TalentHunt.Data
                 passwordHash = hashedPassword.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
                 key = hashedPassword.Key;
             }
+        }
+
+        public List<byte[]> CreatePasswordWithEncryption(string password)
+        {
+            byte[] passwordHash, key;
+            using (var hashedPassword = new System.Security.Cryptography.HMACSHA512())
+            {
+                passwordHash = hashedPassword.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                key = hashedPassword.Key;
+            }
+            List<byte[]> password_hash_key = new List<byte[]>();
+            password_hash_key.Add(passwordHash);
+            password_hash_key.Add(key);
+            return password_hash_key;
         }
 
         public async Task<bool> UserExist(string userName)

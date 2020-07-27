@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -16,6 +17,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using TalentHunt.Data;
+using TalentHunt.Models;
 
 namespace TalentHunt
 {
@@ -62,6 +64,36 @@ namespace TalentHunt
                         ValidateAudience = false
                     };
                 });
+
+            // add cors
+            services.AddCors();
+
+            // add login path as I dont have account controller
+            services.ConfigureApplicationCookie(opt => {
+                opt.LoginPath = "/api/auth/login";
+            });
+
+            // add identity
+            services.AddIdentity<User, IdentityRole>(cfg =>
+            {
+                cfg.User.RequireUniqueEmail = true;
+                cfg.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_.0123456789-@";
+
+                cfg.Password = new PasswordOptions
+                {
+                    RequireDigit = true,
+                    RequiredLength = 5,
+                    RequiredUniqueChars = 1,
+                    RequireLowercase = true,
+                    RequireUppercase = true,
+                    RequireNonAlphanumeric = false
+                };
+                cfg.Lockout = new LockoutOptions
+                {
+                    DefaultLockoutTimeSpan = new TimeSpan(0, 0, 5, 0),
+                    MaxFailedAccessAttempts = 5
+                };
+            }).AddEntityFrameworkStores<TalentHuntContext>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -78,10 +110,13 @@ namespace TalentHunt
                 // .UseHsts();
             }
 
-            app.UseAuthentication();
+            app.UseCors(c => c.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 
             app.UseHttpsRedirection();
+
             app.UseStaticFiles();
+
+            app.UseAuthentication();
 
             app.UseRouting();
 

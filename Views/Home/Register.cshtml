@@ -1,0 +1,80 @@
+﻿@model Tuple<TalentHunt.Dtos.RegisterUserDto, TalentHunt.Dtos.LoggingUserDto>
+
+@{
+    bool flag = true;
+    if (flag)
+    {
+        ViewBag.Title = "Register";
+    }
+    else
+    {
+        ViewBag.Title = "Login";
+    }
+}
+
+<h1>Register</h1>
+<hr />
+<div class="row">
+    <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 offset-3">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link active" data-toggle="tab" href="#login">Login</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#register">Signup</a>
+            </li>
+            
+        </ul>
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade active show" id="login">
+                <form asp-action="Login" method="post">
+                    <div asp-validation-summary="None" class="text-danger"></div>
+                    <div class="form-group">
+                        <label asp-for="Item2.Email" class="control-label"></label>
+                        <input asp-for="Item2.Email" id="loginUserName" class="form-control" />
+                        <span asp-validation-for="Item2.Email" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Item2.Password" class="control-label"></label>
+                        <input asp-for="Item2.Password" id="loginPassword" class="form-control" />
+                        <span asp-validation-for="Item2.Password" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="Login" id="login" class="btn btn-primary" />
+                        @*<a href="/home/index" class="btn btn-primary" id="register">Register</a>*@
+                    </div>
+                </form>
+            </div>
+            <div class="tab-pane fade" id="register">
+                <form asp-action="Register" method="post">
+                    <div asp-validation-summary="None" class="text-danger"></div>
+                    <div class="form-group">
+                        <label asp-for="Item1.UserName" class="control-label"></label>
+                        <input asp-for="Item1.UserName" id="userName" class="form-control" />
+                        <span asp-validation-for="Item1.UserName" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Item1.Email" class="control-label"></label>
+                        <input asp-for="Item1.Email" id="email" class="form-control" />
+                        <span asp-validation-for="Item1.Email" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Item1.Password" class="control-label"></label>
+                        <input asp-for="Item1.Password" id="password" class="form-control" />
+                        <span asp-validation-for="Item1.Password" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="Register" id="register" class="btn btn-primary" />
+                        @*<a href="/home/index" class="btn btn-primary" id="register">Register</a>*@
+                    </div>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/index.js"></script>
+}

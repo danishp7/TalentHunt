@@ -16,7 +16,7 @@ namespace TalentHunt.Controllers.ApiControllers
 {
     [Route("api/vacancies")]
     [ApiController]
-    [Authorize]
+    // [Authorize]
     public class VacancyController : ControllerBase
     {
         private readonly IVacancyRepository _repo;
@@ -118,9 +118,9 @@ namespace TalentHunt.Controllers.ApiControllers
         [HttpGet]
         public async Task<IActionResult> GetVacancies()
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            if (userId == 0)
-                return Unauthorized();
+            //var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            //if (userId == 0)
+            //    return Unauthorized();
 
             if (!ModelState.IsValid)
                 return BadRequest("Something went wrong...");
