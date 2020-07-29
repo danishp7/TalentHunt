@@ -27,27 +27,8 @@ namespace TalentHunt.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // relation of user and vacancy
-
-            // set the composite key
-            //modelBuilder.Entity<JobPost>()
-            //    .HasKey(k => new { k.UserUserId, k.VacancyId });
-
-            //// 1 user can add many vacancies
-            //modelBuilder.Entity<JobPost>()
-            //    .HasOne(u => u.User)
-            //    .WithMany(u => u.JobPosts)
-            //    .HasForeignKey(u => u.UserUserId)
-            //    .OnDelete(DeleteBehavior.Cascade);
-
-            //// 1 vacancy can be add by many users
-            //modelBuilder.Entity<JobPost>()
-            //    .HasOne(v => v.Vacancy)
-            //    .WithMany(v => v.JobPosts)
-            //    .HasForeignKey(v => v.VacancyId)
-            //    .OnDelete(DeleteBehavior.Restrict);
-
-            //----------------------------------------------
+            // for identityuserlogin
+            base.OnModelCreating(modelBuilder);
 
             // relation of vacancy and responsibility
 
@@ -80,7 +61,12 @@ namespace TalentHunt.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             //----------------------------------------------
-            base.OnModelCreating(modelBuilder);
+
+            // relation of vacancy and application
+            modelBuilder.Entity<Vacancy>()
+                .HasMany(a => a.Applications)
+                .WithOne(v => v.Vacancy)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

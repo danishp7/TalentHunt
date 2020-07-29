@@ -28,20 +28,22 @@ namespace TalentHunt.Controllers.ApiControllers
         private readonly IConfiguration _config;
         private readonly UserManager<User> _user;
         private readonly SignInManager<User> _signInUser;
-
+        private readonly RoleManager<IdentityRole> _roleManager;
         public AuthController(IAuthRepository repository, IMapper mapper, IConfiguration configuration,
-                              UserManager<User> userManager, SignInManager<User> signInManager)
+                              UserManager<User> userManager, SignInManager<User> signInManager,
+                              RoleManager<IdentityRole> roleManager)
         {
             _repo = repository;
             _mapper = mapper;
             _config = configuration;
             _user = userManager;
             _signInUser = signInManager;
+            _roleManager = roleManager;
         }
 
         // Post: api/auth/register
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterUserDto userDto)
+        public async Task<IActionResult> Register([FromBody] AuthDto userDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest("Something went wrong...");
@@ -70,7 +72,7 @@ namespace TalentHunt.Controllers.ApiControllers
 
         // Post: api/auth/login
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoggingUserDto logInUserDto)
+        public async Task<IActionResult> Login([FromBody] AuthDto logInUserDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest("Something went wrong...");

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TalentHunt.Data;
 
 namespace TalentHunt.Migrations
 {
     [DbContext(typeof(TalentHuntContext))]
-    partial class TalentHuntContextModelSnapshot : ModelSnapshot
+    [Migration("20200729135308_VacancyApplicationUpdated")]
+    partial class VacancyApplicationUpdated
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -157,19 +159,16 @@ namespace TalentHunt.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("AppUserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ApplicantAddress")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ApplicantContactNumber")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("ApplicantContactNumber")
+                        .HasColumnType("int");
 
                     b.Property<string>("ApplicantEmail")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ApplicantName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ApplicationAddress")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("DegreeEndDate")
@@ -181,14 +180,14 @@ namespace TalentHunt.Migrations
                     b.Property<int>("EducationLevelId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("EmployerStartDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime?>("EmploymentEndDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("EmploymentId")
                         .HasColumnType("int");
-
-                    b.Property<DateTime?>("EmploymentStartDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("InstituteId")
                         .HasColumnType("int");
@@ -198,7 +197,7 @@ namespace TalentHunt.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AppUserId");
+                    b.HasIndex("InstituteId");
 
                     b.HasIndex("VacancyId");
 
@@ -479,9 +478,11 @@ namespace TalentHunt.Migrations
 
             modelBuilder.Entity("TalentHunt.Models.Application", b =>
                 {
-                    b.HasOne("TalentHunt.Models.User", "AppUser")
+                    b.HasOne("TalentHunt.Models.Institute", "Institute")
                         .WithMany()
-                        .HasForeignKey("AppUserId");
+                        .HasForeignKey("InstituteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("TalentHunt.Models.Vacancy", "Vacancy")
                         .WithMany("Applications")

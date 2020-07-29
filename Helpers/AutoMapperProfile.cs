@@ -22,8 +22,6 @@ namespace TalentHunt.Helpers
 
             CreateMap<ExperienceDto, Experience>().ReverseMap();
 
-            CreateMap<JobPostDto, JobPost>().ReverseMap();
-
             CreateMap<ResponsibilityDto, Responsibility>().ReverseMap();
 
             CreateMap<KeyResponsibilityDto, KeyResponsibility>().ReverseMap();
@@ -33,6 +31,8 @@ namespace TalentHunt.Helpers
             CreateMap<ConciseVacancyDto, Vacancy>().ReverseMap();
 
             CreateMap<EducationDto, Education>().ReverseMap();
+
+            CreateMap<ApplicationDto, Application>().ReverseMap();
         }
     }
 }

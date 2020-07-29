@@ -15,7 +15,7 @@ using TalentHunt.Models;
 
 namespace TalentHunt.Controllers.ApiControllers
 {
-    [AllowAnonymous]
+    [Authorize(Roles = "Hr")]
     [Route("api/vacancies")]
     [ApiController]
     // [Authorize]
@@ -35,7 +35,6 @@ namespace TalentHunt.Controllers.ApiControllers
         }
 
         // POST: api/vacancies
-        [Authorize]
         [HttpPost("postVacancy")]
         public async Task<IActionResult> PostVacancy([FromBody] PostVacancyDto vacancyDto)
         {
@@ -73,7 +72,6 @@ namespace TalentHunt.Controllers.ApiControllers
         }
 
         // PUT: api/vacancies
-        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateVacancy(int id, [FromBody] PostVacancyDto vacancyDto)
         {

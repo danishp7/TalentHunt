@@ -50,6 +50,7 @@ namespace TalentHunt
             services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddScoped<ISharedRepository, SharedRepository>();
             services.AddScoped<IVacancyRepository, VacancyRepository>();
+            services.AddScoped<IApplicationRepository, ApplicationRepository>();
 
             // add authentication
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -94,6 +95,9 @@ namespace TalentHunt
                     MaxFailedAccessAttempts = 5
                 };
             }).AddEntityFrameworkStores<TalentHuntContext>();
+
+            // add roles
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

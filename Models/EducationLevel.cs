@@ -8,6 +8,6 @@ namespace TalentHunt.Models
     public class EducationLevel
     {
         public int Id { get; set; }
-        public string Title { get; set; }
+        public string MaximumEducationLevel { get; set; }
     }
 }
