@@ -8,5 +8,6 @@ namespace TalentHunt.Data
     public interface IApplicationRepository
     {
         Task<ApplicationDto> ValidateApplicationFields(ApplicationDto model);
+        Task<bool> IsApply(User user, int vacancyId);
     }
 }

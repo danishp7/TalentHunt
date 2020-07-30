@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TalentHunt.Dtos;
+using TalentHunt.Models;
 
 namespace TalentHunt.Data
 {
@@ -13,6 +14,17 @@ namespace TalentHunt.Data
         public ApplicationRepository(TalentHuntContext talentHuntContext)
         {
             _ctx = talentHuntContext;
+        }
+
+        public async Task<bool> IsApply(User user, int vacancyId)
+        {
+            var application = await _ctx.Applications
+                .Where(a => a.AppUser == user && a.VacancyId == vacancyId)
+                .FirstOrDefaultAsync();
+
+            if (application == null)
+                return false;
+            return true;
         }
 
         public async Task<ApplicationDto> ValidateApplicationFields(ApplicationDto model)

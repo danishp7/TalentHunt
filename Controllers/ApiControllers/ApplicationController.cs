@@ -43,6 +43,12 @@ namespace TalentHunt.Controllers.ApiControllers
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
+            // check if user has already applied for this job or not
+            var user = await _user.FindByIdAsync(userId);
+            var isApply = await _repo.IsApply(user, model.VacancyId);
+            if (isApply == true)
+                return BadRequest("You have already applied for this job.");
+
             if (!ModelState.IsValid)
                 return BadRequest("Something went wrong...");
 
@@ -52,7 +58,6 @@ namespace TalentHunt.Controllers.ApiControllers
 
             var application = _mapper.Map<Application>(modelFields);
 
-            var user = await _user.FindByIdAsync(userId);
             application.AppUser = user;
 
             _sharedRepo.Add(application);
