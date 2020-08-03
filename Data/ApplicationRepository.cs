@@ -16,6 +16,14 @@ namespace TalentHunt.Data
             _ctx = talentHuntContext;
         }
 
+        public async Task<Application> GetApplication(int id)
+        {
+            var app = await _ctx.Applications.SingleOrDefaultAsync(a => a.Id == id);
+            if (app == null)
+                return null;
+            return app;
+        }
+
         public async Task<bool> IsApply(User user, int vacancyId)
         {
             var application = await _ctx.Applications

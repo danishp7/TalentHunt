@@ -34,6 +34,7 @@ namespace TalentHunt.Helpers
                 var result = await userManager.CreateAsync(user, "P@ssw0rd");
                 if (result.Succeeded)
                     await userManager.AddToRoleAsync(user, "Hr");
+
             }
         }
     }

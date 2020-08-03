@@ -17,6 +17,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using TalentHunt.Data;
+using TalentHunt.Helpers;
 using TalentHunt.Models;
 
 namespace TalentHunt
@@ -96,7 +97,8 @@ namespace TalentHunt
                 };
             }).AddEntityFrameworkStores<TalentHuntContext>();
 
-            // add roles
+            // register application settings
+            services.Configure<ApplicationSettings>(_config.GetSection("ApplicationSettings"));
             
         }
 

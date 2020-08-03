@@ -9,5 +9,6 @@ namespace TalentHunt.Data
     {
         Task<ApplicationDto> ValidateApplicationFields(ApplicationDto model);
         Task<bool> IsApply(User user, int vacancyId);
+        Task<Application> GetApplication(int id);
     }
 }

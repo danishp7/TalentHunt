@@ -8,6 +8,7 @@ namespace TalentHunt.Models
     public class Application
     {
         public int Id { get; set; }
+        public string CvName { get; set; }
         public string ApplicantName { get; set; }
         public string ApplicantEmail { get; set; }
         public string ApplicantContactNumber { get; set; }
