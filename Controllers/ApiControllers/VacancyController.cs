@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using TalentHunt.Data;
 using TalentHunt.Dtos;
+using TalentHunt.Helpers;
 using TalentHunt.Models;
 
 namespace TalentHunt.Controllers.ApiControllers
@@ -147,7 +148,7 @@ namespace TalentHunt.Controllers.ApiControllers
         // GET: api/vacancies
         [AllowAnonymous]
         [HttpGet]
-        public async Task<IActionResult> GetVacancies()
+        public async Task<IActionResult> GetVacancies([FromQuery] Params userParams)
         {
             if (!User.Identity.IsAuthenticated)
                 return BadRequest("Please signed in to your account.");
@@ -162,7 +163,7 @@ namespace TalentHunt.Controllers.ApiControllers
             var currentlyLoginUserName = User.Identity.Name;
             var loggedInUser = await _user.FindByEmailAsync(currentlyLoginUserName);
 
-            var vacancies = await _repo.GetVacancies(loggedInUser);
+            var vacancies = await _repo.GetVacancies(loggedInUser, userParams);
             if (vacancies == null)
                 return BadRequest("Something went wrong...");
 

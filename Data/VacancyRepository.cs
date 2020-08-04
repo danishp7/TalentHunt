@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TalentHunt.Dtos;
+using TalentHunt.Helpers;
 using TalentHunt.Models;
 
 namespace TalentHunt.Data
@@ -41,13 +42,16 @@ namespace TalentHunt.Data
             return responsibilities;
         }
 
-        public async Task<IEnumerable<Vacancy>> GetVacancies(User loggedInUser)
+        public async Task<PagedList<Vacancy>> GetVacancies(User loggedInUser, Params userParams)
         {
-            var vacancies = await _ctx.Vacancies.Where(u => u.AppUser.Id == loggedInUser.Id).ToListAsync();
-            if (vacancies == null)
-                return null;
+            var vacancies = _ctx.Vacancies.AsQueryable();
+            vacancies = vacancies.Where(u => u.AppUser == loggedInUser);
+            vacancies = vacancies.OrderBy(v => v.Title);
 
-            return vacancies;
+            if (string.IsNullOrWhiteSpace(userParams.KeyWord) || !userParams.KeyWord.Equals("default"))
+                vacancies = vacancies.Where(v => v.Title.Contains(userParams.KeyWord));
+
+            return await PagedList<Vacancy>.CreateAsync(vacancies, userParams.PageNumber, userParams.PageSize);
         }
 
         public async Task<Vacancy> GetVacancy(int id, User loggedInUser)
@@ -95,5 +99,6 @@ namespace TalentHunt.Data
                 return true;
             return false;
         }
+
     }
 }
